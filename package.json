@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "ts-node -r tsconfig-paths/register --esm server --files",
+    "dev": "ts-node -r tsconfig-paths/register --experimental-specifier-resolution=node --esm app.ts --files",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },

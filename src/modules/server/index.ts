@@ -6,12 +6,13 @@ import { createServer as createViteServer } from 'vite';
 
 const __dirname = path.dirname( fileURLToPath( import.meta.url ) );
 
-async function createServer () {
+export async function createServer () {
     const app = express();
 
     // 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
     // 并让上级服务器接管控制
     const vite = await createViteServer( {
+        root: __dirname,
         server: { middlewareMode: true },
         appType: 'custom'
     } );
@@ -39,7 +40,7 @@ async function createServer () {
             // 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
             //    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
             //    并提供类似 HMR 的根据情况随时失效。
-            const { render } = await vite.ssrLoadModule( '/src/entry-server.ts' );
+            const { render } = await vite.ssrLoadModule( path.resolve( __dirname, 'entry/server.ts' ) );
 
             // 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
             //    函数调用了适当的 SSR 框架 API。
@@ -61,5 +62,3 @@ async function createServer () {
 
     app.listen( 5173 );
 }
-
-createServer();
