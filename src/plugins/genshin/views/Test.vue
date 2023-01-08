@@ -2,8 +2,5 @@
 </script>
 
 <template>
-    <router-view/>
+    <div class="Test">test</div>
 </template>
-
-<style scoped>
-</style>

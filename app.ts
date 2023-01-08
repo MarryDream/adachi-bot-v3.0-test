@@ -1,4 +1,3 @@
-import {createServer} from "./src/modules/server";
-createServer()
+import Adachi from "@/modules/bot";
 
-export {}
+export default new Adachi( __dirname ).run();

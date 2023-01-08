@@ -2,16 +2,16 @@
   "name": "vite-ssr-vue",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "ts-node -r tsconfig-paths/register --experimental-specifier-resolution=node --esm app.ts --files",
+    "dev": "ts-node -r tsconfig-paths/register app --files",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "express": "^4.18.2",
     "vue": "^3.2.45",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.15",

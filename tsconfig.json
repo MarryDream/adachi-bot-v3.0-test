@@ -3,14 +3,14 @@
     "baseUrl": ".",
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "Node",
     "strict": true,
     "jsx": "preserve",
     "paths": {
       "ROOT": [ "app.ts" ],
-      "@*": [ "src/*" ],
-      "#*": [ "src/plugins/*" ]
+      "@/*": [ "src/*" ],
+      "#/*": [ "src/plugins/*" ]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -19,6 +19,14 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "app.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ],
+  "references": [
+    { "path": "./tsconfig.node.json" }
+  ]
 }
