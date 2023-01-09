@@ -8,6 +8,7 @@ import Plugin from "./plugin";
  * @file 文件管理
  * */
 export interface BOT {
+	readonly root: string;
 	readonly file: FileManagement;
 }
 
@@ -19,6 +20,7 @@ export default class Adachi {
 		const file = new FileManagement( root );
 		
 		this.bot = {
+			root,
 			file
 		};
 	}

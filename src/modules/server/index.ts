@@ -1,9 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import express from 'express';
-import { Router, RouteRecordRaw } from "vue-router";
-import { createRouter } from './entry/router';
-import { createServer as createViteServer } from 'vite';
+import fs from "fs";
+import { resolve, dirname } from "path";
+import express from "express";
+import { fileURLToPath } from "url";
+import { RouteRecordRaw } from "vue-router";
+import { createServer as createViteServer } from "vite";
+
+const __dirname = dirname( fileURLToPath( import.meta.url ) );
 
 export default class RenderServer {
 	
@@ -12,11 +14,9 @@ export default class RenderServer {
 	constructor( routers: Array<RouteRecordRaw> ) {
 		this.routers = routers;
 	}
-	
-	public addRouters( router: Router ) {
-		this.routers.forEach( r => {
-			router.addRoute( r );
-		} )
+
+	public addRoutes(routers: Array<RouteRecordRaw>) {
+		this.routers = this.routers.concat(routers);
 	}
 	
 	public async createServer() {
@@ -25,9 +25,10 @@ export default class RenderServer {
 		// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
 		// 并让上级服务器接管控制
 		const vite = await createViteServer( {
+			base: "/",
 			root: __dirname,
 			server: { middlewareMode: true },
-			appType: 'custom'
+			appType: "custom"
 		} );
 		
 		// 使用 vite 的 Connect 实例作为中间件
@@ -40,10 +41,7 @@ export default class RenderServer {
 			
 			try {
 				// 1. 读取 index.html
-				let template = fs.readFileSync(
-					path.resolve( __dirname, 'index.html' ),
-					'utf-8',
-				);
+				let template = fs.readFileSync( resolve( __dirname, "index.html" ), "utf-8" );
 				
 				// 2. 应用 Vite HTML 转换。这将会注入 Vite HMR 客户端，
 				//    同时也会从 Vite 插件应用 HTML 转换。
@@ -53,7 +51,10 @@ export default class RenderServer {
 				// 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
 				//    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
 				//    并提供类似 HMR 的根据情况随时失效。
-				const { render } = await vite.ssrLoadModule( path.resolve( __dirname, 'entry/server.ts' ) );
+				console.log("???");
+				
+				const { render } = await vite.ssrLoadModule( "/entry/server.ts" );
+				console.log(render);
 				
 				// 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
 				//    函数调用了适当的 SSR 框架 API。
@@ -64,12 +65,14 @@ export default class RenderServer {
 				const html = template.replace( `<!--ssr-outlet-->`, appHtml );
 				
 				// 6. 返回渲染后的 HTML。
-				res.status( 200 ).set( { 'Content-Type': 'text/html' } ).end( html );
+				res.status( 200 ).set( { "Content-Type": "text/html" } ).end( html );
 			} catch ( e ) {
 				// 如果捕获到了一个错误，让 Vite 来修复该堆栈，这样它就可以映射回
 				// 你的实际源码中。
-				vite.ssrFixStacktrace( <Error>e );
-				next( e );
+				const err: Error = <Error>e;
+				vite.ssrFixStacktrace( err );
+				console.log(err.stack);
+				res.status(500).end(err.stack);
 			}
 		} );
 		

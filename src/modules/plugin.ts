@@ -2,8 +2,6 @@ import { BOT } from "@/modules/bot";
 import { RouteRecordRaw } from "vue-router";
 import { extname } from "path";
 
-declare function require( moduleName: string ): any;
-
 export interface PluginSetting {
 	name: string;
 	renderDir?: string;
@@ -16,8 +14,7 @@ export default class Plugin {
 		
 		/* 从 plugins 文件夹从导入 init.ts 进行插件初始化 */
 		for ( let plugin of plugins ) {
-			const path: string = bot.file.getFilePath( `${ plugin }/init`, "plugin" );
-			const { init } = require( path );
+			const { init } = await import( `../plugins/${ plugin }/init.ts` );
 			try {
 				const { name, renderDir }: PluginSetting = await init( bot );
 				if ( renderDir ) {
@@ -26,10 +23,9 @@ export default class Plugin {
 						return extname( v ) === ".vue";
 					} ).forEach( v => {
 						const fileName: string = v.replace( /\.vue$/, "" );
-						const filePath: string = bot.file.getFilePath( `${ plugin }/${ renderDir }/${ v }`, "plugin" );
 						routers.push( {
 							path: `/${ plugin }/${ fileName }`,
-							component: () => import(filePath)
+							component: () => import( `../plugins/${ plugin }/${ renderDir }/${ v }` )
 						} );
 					} );
 				}
