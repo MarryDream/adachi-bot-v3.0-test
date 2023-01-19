@@ -1,6 +1,6 @@
 import { BOT } from "@/modules/bot";
-import { RouteRecordRaw } from "vue-router";
 import { extname } from "path";
+import { RenderRoutes } from "@/modules/server";
 
 export interface PluginSetting {
 	name: string;
@@ -8,9 +8,9 @@ export interface PluginSetting {
 }
 
 export default class Plugin {
-	public static async load( bot: BOT ): Promise<Array<RouteRecordRaw>> {
+	public static async load( bot: BOT ): Promise<Array<RenderRoutes>> {
 		const plugins: string[] = bot.file.getDirFiles( "", "plugin" );
-		const routers: Array<RouteRecordRaw> = [];
+		const routers: Array<RenderRoutes> = [];
 		
 		/* 从 plugins 文件夹从导入 init.ts 进行插件初始化 */
 		for ( let plugin of plugins ) {
@@ -25,7 +25,11 @@ export default class Plugin {
 						const fileName: string = v.replace( /\.vue$/, "" );
 						routers.push( {
 							path: `/${ plugin }/${ fileName }`,
-							component: () => import( `../plugins/${ plugin }/${ renderDir }/${ v }` )
+							componentData: {
+								plugin,
+								renderDir,
+								fileName
+							}
 						} );
 					} );
 				}

@@ -1,29 +1,40 @@
 import fs from "fs";
 import { resolve, dirname } from "path";
 import express from "express";
-import { fileURLToPath } from "url";
-import { RouteRecordRaw } from "vue-router";
 import { createServer as createViteServer } from "vite";
+import { fileURLToPath } from "url";
+
+export interface RenderRoutes {
+	path: string;
+	componentData: {
+		plugin: string;
+		renderDir: string;
+		fileName: string;
+	};
+}
 
 const __dirname = dirname( fileURLToPath( import.meta.url ) );
 
 export default class RenderServer {
 	
-	private routers: Array<RouteRecordRaw>;
+	private routers: Array<RenderRoutes>;
 	
-	constructor( routers: Array<RouteRecordRaw> ) {
+	constructor( routers: Array<RenderRoutes> ) {
 		this.routers = routers;
 	}
-
-	public addRoutes(routers: Array<RouteRecordRaw>) {
-		this.routers = this.routers.concat(routers);
+	
+	public addRoutes( routers: Array<RenderRoutes> ) {
+		this.routers = this.routers.concat( routers );
 	}
 	
 	public async createServer() {
 		const app = express();
 		
+		// @ts-ignore
+		globalThis.__ADACHI_ROUTES__ = this.routers;
 		// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
 		// 并让上级服务器接管控制
+		// 执行此方法后将会调用指定 root 目录下的 vite.config.ts
 		const vite = await createViteServer( {
 			base: "/",
 			root: __dirname,
@@ -34,6 +45,10 @@ export default class RenderServer {
 		// 使用 vite 的 Connect 实例作为中间件
 		// 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
 		app.use( vite.middlewares );
+		
+		app.get( "/api/test", async ( req, res ) => {
+			res.status( 200 ).send( true );
+		} )
 		
 		app.use( '*', async ( req, res, next ) => {
 			// 服务 index.html - 下面我们来处理这个问题
@@ -51,10 +66,8 @@ export default class RenderServer {
 				// 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
 				//    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
 				//    并提供类似 HMR 的根据情况随时失效。
-				console.log("???");
 				
 				const { render } = await vite.ssrLoadModule( "/entry/server.ts" );
-				console.log(render);
 				
 				// 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
 				//    函数调用了适当的 SSR 框架 API。
@@ -62,7 +75,9 @@ export default class RenderServer {
 				const appHtml: string = await render( url, this.routers );
 				
 				// 5. 注入渲染后的应用程序 HTML 到模板中。
-				const html = template.replace( `<!--ssr-outlet-->`, appHtml );
+				const html = template
+					.replace( `<!--adachi-template-slot-->`, appHtml )
+					.replace( `<!--adachi-routes-->`, `window.__ADACHI_ROUTES__ = ${ JSON.stringify( this.routers ) }` );
 				
 				// 6. 返回渲染后的 HTML。
 				res.status( 200 ).set( { "Content-Type": "text/html" } ).end( html );
@@ -71,11 +86,10 @@ export default class RenderServer {
 				// 你的实际源码中。
 				const err: Error = <Error>e;
 				vite.ssrFixStacktrace( err );
-				console.log(err.stack);
-				res.status(500).end(err.stack);
+				console.log( err.stack );
+				res.status( 500 ).end( err.stack );
 			}
 		} );
-		
 		app.listen( 5173 );
 	}
 }
