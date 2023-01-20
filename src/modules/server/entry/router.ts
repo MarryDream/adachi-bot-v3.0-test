@@ -3,13 +3,12 @@ import {
     createWebHistory,
     createMemoryHistory
 } from "vue-router";
-import { RenderRoutes } from "../index";
+import { RenderRoutes } from "@/types/render";
 
 export function createRouter() {
-	// @ts-ignore
 	const routes: Array<RenderRoutes> = globalThis.__ADACHI_ROUTES__ || [];
     return _createRouter({
-        history: import.meta.env.SSR
+        history: globalThis.global
             ? createMemoryHistory()
             : createWebHistory(),
         routes: routes.map( ({ path, componentData: { plugin, renderDir, fileName } }) => {

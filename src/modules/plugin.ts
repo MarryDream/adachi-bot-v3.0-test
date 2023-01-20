@@ -1,6 +1,6 @@
 import { BOT } from "@/modules/bot";
 import { extname } from "path";
-import { RenderRoutes } from "@/modules/server";
+import { RenderRoutes } from "@/types/render";
 
 export interface PluginSetting {
 	name: string;
@@ -14,7 +14,7 @@ export default class Plugin {
 		
 		/* 从 plugins 文件夹从导入 init.ts 进行插件初始化 */
 		for ( let plugin of plugins ) {
-			const { init } = await import( `../plugins/${ plugin }/init.ts` );
+			const { init } = await import( `#/${ plugin }/init.ts` );
 			try {
 				const { name, renderDir }: PluginSetting = await init( bot );
 				if ( renderDir ) {

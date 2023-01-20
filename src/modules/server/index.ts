@@ -1,19 +1,8 @@
 import fs from "fs";
-import { resolve, dirname } from "path";
+import { resolve } from "path";
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { fileURLToPath } from "url";
-
-export interface RenderRoutes {
-	path: string;
-	componentData: {
-		plugin: string;
-		renderDir: string;
-		fileName: string;
-	};
-}
-
-const __dirname = dirname( fileURLToPath( import.meta.url ) );
+import { RenderRoutes } from "@/types/render";
 
 export default class RenderServer {
 	
@@ -30,7 +19,6 @@ export default class RenderServer {
 	public async createServer() {
 		const app = express();
 		
-		// @ts-ignore
 		globalThis.__ADACHI_ROUTES__ = this.routers;
 		// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
 		// 并让上级服务器接管控制
@@ -72,7 +60,7 @@ export default class RenderServer {
 				// 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
 				//    函数调用了适当的 SSR 框架 API。
 				//    例如 ReactDOMServer.renderToString()
-				const appHtml: string = await render( url, this.routers );
+				const appHtml: string = await render( url );
 				
 				// 5. 注入渲染后的应用程序 HTML 到模板中。
 				const html = template
