@@ -3,6 +3,7 @@ export interface RenderRoutes {
 	componentData: {
 		plugin: string;
 		renderDir: string;
+		fileDir?: string;
 		fileName: string;
 	};
 }

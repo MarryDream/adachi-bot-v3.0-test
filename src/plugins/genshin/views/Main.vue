@@ -15,3 +15,9 @@ export default defineComponent({
     }
 })
 </script>
+
+<style lang="scss">
+.Main {
+    color: #f00;
+}
+</style>

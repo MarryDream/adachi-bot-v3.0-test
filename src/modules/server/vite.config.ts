@@ -7,11 +7,13 @@ export default ( env: any ) => {
 	console.log( env );
 	
 	return defineConfig( {
+		root: __dirname,
 		plugins: [ vue() ],
 		resolve: {
 			alias: {
-				"@": path.resolve(__dirname, "../../../src"),
-				"#": path.resolve(__dirname, "../../../src/plugins")
+				"ROOT": path.resolve( __dirname, "../../app.ts" ),
+				"@": path.resolve( __dirname, "../../../src" ),
+				"#": path.resolve( __dirname, "../../../src/plugins" )
 			}
 		}
 	} )

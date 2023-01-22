@@ -19,18 +19,11 @@ export default class Plugin {
 				const { name, renderDir }: PluginSetting = await init( bot );
 				if ( renderDir ) {
 					const views = bot.file.getDirFiles( `${ plugin }/${ renderDir }`, "plugin" );
-					views.filter( v => {
-						return extname( v ) === ".vue";
-					} ).forEach( v => {
-						const fileName: string = v.replace( /\.vue$/, "" );
-						routers.push( {
-							path: `/${ plugin }/${ fileName }`,
-							componentData: {
-								plugin,
-								renderDir,
-								fileName
-							}
-						} );
+					views.forEach( v => {
+						const route = setRenderRoute( bot, plugin, renderDir, v );
+						if ( route ) {
+							routers.push( route );
+						}
 					} );
 				}
 				console.log( `插件 ${ name } 加载完成` );
@@ -40,4 +33,43 @@ export default class Plugin {
 		}
 		return routers;
 	}
+}
+
+/* 获取插件渲染页的路由对象 */
+function setRenderRoute( bot: BOT, plugin: string, renderDir: string, view: string ): RenderRoutes | null {
+	let route: RenderRoutes | null = null;
+	const ext: string = extname( view );
+	if ( ext === ".vue" ) {
+		// 加载后缀名为 vue 的文件
+		const fileName: string = view.replace( /\.vue$/, "" );
+		route = {
+			path: `/${ plugin }/${ fileName }`,
+			componentData: {
+				plugin,
+				renderDir,
+				fileName
+			}
+		}
+	} else if ( !ext ) {
+		// 后缀名不存在且为目录时，加载目录下的 index.vue 文件
+		const fileType = bot.file.getFileType( `${ plugin }/${ renderDir }/${ view }`, "plugin" );
+		if ( fileType === "directory" ) {
+			const path: string = bot.file.getFilePath( `${ plugin }/${ renderDir }/${ view }/index.vue`, "plugin" );
+			// 判断目录下是否存在 index.vue
+			const isExist: boolean = bot.file.isExist( path );
+			if ( isExist ) {
+				route = {
+					path: `/${ plugin }/${ view }`,
+					componentData: {
+						plugin,
+						renderDir,
+						fileDir: view,
+						fileName: "index"
+					}
+				}
+			}
+		}
+	}
+	
+	return route;
 }
