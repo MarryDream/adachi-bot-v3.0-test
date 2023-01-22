@@ -4,8 +4,6 @@ import { createApp } from './main';
 export async function render( url: string ) {
 	const { app, router } = createApp();
 	
-	console.log(router.getRoutes())
-	
 	await router.push( url );
 	await router.isReady();
 	

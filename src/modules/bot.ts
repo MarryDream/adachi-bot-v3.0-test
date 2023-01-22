@@ -26,11 +26,8 @@ export default class Adachi {
 	}
 	
 	public run(): BOT {
-		Plugin.load( this.bot ).then( routers => {
-			const server = new RenderServer( routers );
-			server.createServer().then( () => {
-			
-			} );
+		Plugin.load( this.bot ).then( ( { renderRoutes, serverRouters } ) => {
+			new RenderServer( renderRoutes, serverRouters );
 		} );
 		return this.bot;
 	}

@@ -1,37 +1,59 @@
 import { BOT } from "@/modules/bot";
 import { extname } from "path";
-import { RenderRoutes } from "@/types/render";
+import { RenderRoutes, ServerRouters } from "@/types/render";
+import { Router } from "express";
+
+export interface PluginLoadResult {
+	renderRoutes: Array<RenderRoutes>;
+	serverRouters: Array<ServerRouters>;
+}
 
 export interface PluginSetting {
 	name: string;
-	renderDir?: string;
+	// 加个开关，dir 默认 views
+	render?: {
+		dirname?: string
+	};
+	server?: {
+		routers?: Record<string, Router>
+	}
 }
 
 export default class Plugin {
-	public static async load( bot: BOT ): Promise<Array<RenderRoutes>> {
+	public static async load( bot: BOT ): Promise<PluginLoadResult> {
 		const plugins: string[] = bot.file.getDirFiles( "", "plugin" );
-		const routers: Array<RenderRoutes> = [];
+		const renderRoutes: Array<RenderRoutes> = [];
+		const serverRouters: Array<ServerRouters> = [];
 		
 		/* 从 plugins 文件夹从导入 init.ts 进行插件初始化 */
 		for ( let plugin of plugins ) {
 			const { init } = await import( `#/${ plugin }/init.ts` );
 			try {
-				const { name, renderDir }: PluginSetting = await init( bot );
-				if ( renderDir ) {
+				const { name, render, server }: PluginSetting = await init( bot );
+				if ( render?.dirname ) {
+					const renderDir: string = render.dirname;
 					const views = bot.file.getDirFiles( `${ plugin }/${ renderDir }`, "plugin" );
 					views.forEach( v => {
 						const route = setRenderRoute( bot, plugin, renderDir, v );
 						if ( route ) {
-							routers.push( route );
+							renderRoutes.push( route );
 						}
 					} );
+				}
+				if ( server?.routers ) {
+					Object.entries( server.routers ).forEach( ( [ path, router ] ) => {
+						serverRouters.push( {
+							path: `/${ plugin }${ path }`,
+							router
+						} )
+					} )
 				}
 				console.log( `插件 ${ name } 加载完成` );
 			} catch ( error ) {
 				console.log( `插件加载异常: ${ <string>error }` );
 			}
 		}
-		return routers;
+		return { renderRoutes, serverRouters };
 	}
 }
 

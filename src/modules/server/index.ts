@@ -2,24 +2,27 @@ import fs from "fs";
 import { resolve } from "path";
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { RenderRoutes } from "@/types/render";
+import { RenderRoutes, ServerRouters } from "@/types/render";
 
 export default class RenderServer {
 	
-	private routers: Array<RenderRoutes>;
+	private renderRoutes: Array<RenderRoutes>;
+	private readonly serverRouters: Array<ServerRouters>;
 	
-	constructor( routers: Array<RenderRoutes> ) {
-		this.routers = routers;
+	constructor( renderRoutes: Array<RenderRoutes>, serverRouters: Array<ServerRouters> ) {
+		this.renderRoutes = renderRoutes;
+		this.serverRouters = serverRouters;
+		this.createServer().catch();
 	}
 	
-	public addRoutes( routers: Array<RenderRoutes> ) {
-		this.routers = this.routers.concat( routers );
+	public addRoutes( routes: Array<RenderRoutes> ) {
+		this.renderRoutes = this.renderRoutes.concat( routes );
 	}
 	
 	public async createServer() {
 		const app = express();
 		
-		globalThis.__ADACHI_ROUTES__ = this.routers;
+		globalThis.__ADACHI_ROUTES__ = this.renderRoutes;
 		// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
 		// 并让上级服务器接管控制
 		// 执行此方法后将会调用指定 root 目录下的 vite.config.ts
@@ -34,9 +37,12 @@ export default class RenderServer {
 		// 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
 		app.use( vite.middlewares );
 		
-		app.get( "/api/test", async ( req, res ) => {
-			res.status( 200 ).send( true );
-		} )
+		// 遍历注册插件 express 路由
+		for ( const r of this.serverRouters ) {
+			app.use( r.path, r.router );
+		}
+		
+		console.log( this.serverRouters )
 		
 		app.use( '*', async ( req, res, next ) => {
 			// 服务 index.html - 下面我们来处理这个问题
@@ -65,7 +71,7 @@ export default class RenderServer {
 				// 5. 注入渲染后的应用程序 HTML 到模板中。
 				const html = template
 					.replace( `<!--adachi-template-slot-->`, appHtml )
-					.replace( `<!--adachi-routes-->`, `window.__ADACHI_ROUTES__ = ${ JSON.stringify( this.routers ) }` );
+					.replace( `<!--adachi-routes-->`, `window.__ADACHI_ROUTES__ = ${ JSON.stringify( this.renderRoutes ) }` );
 				
 				// 6. 返回渲染后的 HTML。
 				res.status( 200 ).set( { "Content-Type": "text/html" } ).end( html );
