@@ -9,8 +9,8 @@ export default defineComponent({
     name: "Main",
     setup() {
         onMounted(async () => {
-            const res = await fetch("/genshin/api/info");
-            console.log(await res.json());
+            // const res = await fetch("/genshin/api/info");
+            // console.log(await res.json());
         })
     }
 })

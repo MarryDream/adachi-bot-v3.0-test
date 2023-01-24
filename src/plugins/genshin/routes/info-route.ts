@@ -1,5 +1,8 @@
 import express from "express";
+import { getInfo } from "#/genshin/utils/api";
 
 export default express.Router().get( "/", async ( req, res ) => {
-	res.status( 200 ).send( true );
+	const name: string = <string>req.query.name;
+	const data: any = await getInfo( name );
+	res.send( data );
 } );

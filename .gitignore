@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# adachi
+/config/
+/data/
+/database/
+/logs/
+/src/data/
+/src/plugins/genshin/data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

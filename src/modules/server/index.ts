@@ -42,8 +42,6 @@ export default class RenderServer {
 			app.use( r.path, r.router );
 		}
 		
-		console.log( this.serverRouters )
-		
 		app.use( '*', async ( req, res, next ) => {
 			// 服务 index.html - 下面我们来处理这个问题
 			const url = req.originalUrl;
@@ -61,16 +59,16 @@ export default class RenderServer {
 				//    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
 				//    并提供类似 HMR 的根据情况随时失效。
 				
-				const { render } = await vite.ssrLoadModule( "/entry/server.ts" );
+				// const { render } = await vite.ssrLoadModule( "/entry/server.ts" );
 				
 				// 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
 				//    函数调用了适当的 SSR 框架 API。
 				//    例如 ReactDOMServer.renderToString()
-				const appHtml: string = await render( url );
+				// const appHtml: string = await render( url );
 				
 				// 5. 注入渲染后的应用程序 HTML 到模板中。
 				const html = template
-					.replace( `<!--adachi-template-slot-->`, appHtml )
+					// .replace( `<!--adachi-template-slot-->`, appHtml )
 					.replace( `<!--adachi-routes-->`, `window.__ADACHI_ROUTES__ = ${ JSON.stringify( this.renderRoutes ) }` );
 				
 				// 6. 返回渲染后的 HTML。
