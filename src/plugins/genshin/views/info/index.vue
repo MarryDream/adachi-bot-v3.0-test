@@ -1,5 +1,5 @@
 <template>
-	<div class="info">
+	<div id="app">
 		<info-base v-if="data" :data="data">
 			<info-character v-if="data.type === '角色'" :data="data" :skill="skill"></info-character>
 			<info-weapon v-else :data="data"></info-weapon>
@@ -71,7 +71,7 @@ html {
 </style>
 
 <style lang="scss" scoped>
-.info {
+#app {
 	width: 1440px;
 }
 </style>

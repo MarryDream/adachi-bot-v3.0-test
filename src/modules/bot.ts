@@ -77,7 +77,7 @@ export default class Adachi {
 		} );
 		const logger = client.logger;
 		process.on( "unhandledRejection", reason => {
-			logger.error( ( <Error>reason ).stack );
+			logger.error( ( <Error>reason ).stack || reason );
 		} );
 		
 		const redis = new Database( config.dbPort, config.dbPassword, logger, file );
@@ -378,7 +378,7 @@ export default class Adachi {
 		const userID: number = messageData.user_id;
 		const groupID: number = msg.isGroupMessage( messageData ) ? messageData.group_id : -1;
 		
-		await this.bot.redis.addSetMember( `adachi.user-used-groups-${ userID }`, groupID );
+		await this.bot.redis.addSetMember( `adachi.user-used-groups-${ userID }`, groupID.toString() );
 		await this.bot.redis.incHash( "adachi.hour-stat", userID.toString(), 1 );
 		await this.bot.redis.incHash( "adachi.command-stat", cmd.cmdKey, 1 );
 		

@@ -84,7 +84,7 @@ export class Renderer implements ScreenshotRendererMethods {
 	): Promise<RenderResult> {
 		try {
 			const url: string = this.getURL( route, params );
-			console.log(url)
+			console.log( url )
 			const base64: string = await bot.renderer.screenshot( url, viewPort, selector );
 			const segmentImg: ImageElem = segment.image( base64 );
 			return { code: "ok", data: segmentImg };
@@ -143,7 +143,7 @@ export class BasicRenderer implements RenderMethods {
 			}
 			try {
 				const browser = await puppeteer.launch( {
-					headless: false,
+					headless: true,
 					args: [
 						"--no-sandbox",
 						"--disable-setuid-sandbox",
@@ -179,6 +179,7 @@ export class BasicRenderer implements RenderMethods {
 	}
 	
 	private async pageLoaded( page: puppeteer.Page ) {
+		await page.content();
 		await page.waitForFunction( () => {
 			return document.readyState === "complete";
 		}, { timeout: 10000 } )
@@ -194,7 +195,10 @@ export class BasicRenderer implements RenderMethods {
 			if ( viewPort ) {
 				await page.setViewport( viewPort );
 			}
-			await page.goto( url );
+			await page.goto( url, {
+				waitUntil: "networkidle0",
+				timeout: 30000
+			} );
 			await this.pageLoaded( page );
 			
 			const option: puppeteer.ScreenshotOptions = { encoding: "base64" };
@@ -225,7 +229,10 @@ export class BasicRenderer implements RenderMethods {
 			if ( viewPort ) {
 				await page.setViewport( viewPort );
 			}
-			await page.goto( url );
+			await page.goto( url, {
+				waitUntil: "networkidle0",
+				timeout: 30000
+			} );
 			await this.pageLoaded( page );
 			
 			const result = await pageFunction( page );
