@@ -13,7 +13,7 @@ export async function main(
 	/* 封禁 */
 	if ( match.isOn() ) {
 		if ( msgType === MessageType.Group ) {
-			await redis.addListElement( `adachi.banned-group`, targetID );
+			await redis.addListElement( `adachi.banned-group`, targetID.toString() );
 			await sendMessage( `群 ${ targetID } 已被屏蔽，将不触发任何指令` );
 			return;
 		}
@@ -33,7 +33,7 @@ export async function main(
 	/* 解封 */
 	else {
 		if ( msgType === MessageType.Group ) {
-			await redis.delListElement( `adachi.banned-group`, targetID );
+			await redis.delListElement( `adachi.banned-group`, targetID.toString() );
 			await sendMessage( `群 ${ targetID } 屏蔽已解除` );
 		} else {
 			await redis.setString( `adachi.auth-level-${ targetID }`, AuthLevel.User );

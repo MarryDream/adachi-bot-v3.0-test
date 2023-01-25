@@ -148,7 +148,9 @@ export async function main( i: InputParameter ): Promise<void> {
 		try {
 			await updateBotPlugin( i, pluginName, isForce );
 			await i.sendMessage( `[${ pluginName }]插件更新完成，${ isRestart ? "正在重启服务..." : "请稍后手动重启 BOT" }` );
-			await i.redis.setString( dbKey, checkResult.newDate );
+			if ( checkResult.newDate ) {
+				await i.redis.setString( dbKey, checkResult.newDate );
+			}
 			if ( isRestart ) { // 重启服务
 				restart( "adachi-bot", async ( error ) => {
 					await i.sendMessage( `重启 BOT 出错: ${ error }` );
@@ -189,7 +191,9 @@ export async function main( i: InputParameter ): Promise<void> {
 			try {
 				await updateBotPlugin( i, key, isForce );
 				upgrade_plugins.push( key );
-				await i.redis.setString( dbKey, checkResult.newDate );
+				if ( checkResult.newDate ) {
+					await i.redis.setString( dbKey, checkResult.newDate );
+				}
 			} catch ( e ) {
 				if ( typeof e === "string" ) {
 					upgrade_errors.push( e );

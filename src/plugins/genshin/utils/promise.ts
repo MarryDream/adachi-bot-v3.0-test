@@ -509,7 +509,7 @@ export async function calendarPromise(): Promise<ApiType.CalendarData[]> {
 	
 	/* 记录版本更新时间 */
 	const verDbKey = "silvery-star.calendar-version-time";
-	const verTimeInfo: Record<string, number> = await bot.redis.getHash( verDbKey );
+	const verTimeInfo: Record<string, string> = await bot.redis.getHash( verDbKey );
 	const verLength = Object.keys( verTimeInfo ).length;
 	
 	/* 获取与版本更新有关的文章 */
@@ -529,7 +529,7 @@ export async function calendarPromise(): Promise<ApiType.CalendarData[]> {
 		
 		const time = new Date( verTimeRet[1] ).getTime()
 		if ( !Number.isNaN( time ) ) {
-			verTimeInfo[verRet[1]] = time;
+			verTimeInfo[verRet[1]] = time.toString();
 		}
 	}
 	/* 版本号数据存在变动，更新 */
@@ -554,7 +554,7 @@ export async function calendarPromise(): Promise<ApiType.CalendarData[]> {
 			const vRet = /(\d\.\d)版本更新后/.exec( content );
 			if ( vRet && vRet[1] ) {
 				/* 版本更新活动 */
-				const cTime = verTimeInfo[vRet[1]];
+				const cTime = Number.parseInt( verTimeInfo[vRet[1]] );
 				if ( cTime ) {
 					start = cTime;
 				}
