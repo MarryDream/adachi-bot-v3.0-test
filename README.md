@@ -73,6 +73,8 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 ]
 ```
 
+> 仅指定目录下的第一级 .vue 文件与第一级文件中存在 index.vue 的目录进行加载，不会对不符合加载条件的文件/目录进行处理。
+
 ### 公共 express-server
 
 框架现已集成一个公共 express-server，插件无需再自行监听端口开启，配置 `PluginSetting.server.routers`  即可使用公共 express-server。
@@ -97,11 +99,11 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 }
 ```
 
+### 静态资源服务器
 
+框架集成的公共 express-server 为插件目录注册了静态资源服务器，可通过 `localhost:port/插件目录名/资源路径` 访问。如果你不希望使用 vue 编写渲染页面，可通过此支持来使用类似 v2 的渲染方式。
 
 ## brake change
-
-`PluginSetting.pluginName` 更名为 `PluginSetting.name`;
 
 `renderer.asCqCode` 更名为 `renderer.asSegment`，调用方式不变;
 

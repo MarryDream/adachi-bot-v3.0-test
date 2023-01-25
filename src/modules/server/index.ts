@@ -37,6 +37,9 @@ export default class RenderServer {
 		// 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
 		app.use( vite.middlewares );
 		
+		// 为插件目录挂载静态资源服务
+		app.use( express.static( resolve( __dirname, "../../plugins" ) ) );
+		
 		// 遍历注册插件 express 路由
 		for ( const r of this.serverRouters ) {
 			app.use( r.path, r.router );
