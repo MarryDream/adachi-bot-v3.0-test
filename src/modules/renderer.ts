@@ -68,6 +68,7 @@ export class Renderer implements ScreenshotRendererMethods {
 	): Promise<RenderResult> {
 		try {
 			const url: string = this.getURL( route, params );
+			console.log(url)
 			const base64: string = await bot.renderer.screenshot( url, viewPort, selector );
 			return { code: "ok", data: base64 };
 		} catch ( error ) {

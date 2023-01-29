@@ -103,12 +103,30 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 
 框架集成的公共 express-server 为插件目录注册了静态资源服务器，可通过 `localhost:port/插件目录名/资源路径` 访问。如果你不希望使用 vue 编写渲染页面，可通过此支持来使用类似 v2 的渲染方式。
 
+同时，当你希望在前端页面中引入本地资源时，则可以利用静态资源服务器来进行访问。
+
+**示例**
+
+存在如下目录结构：
+
+```text
+- test-plugin
+  - assets
+    - test.png
+```
+
+你可以在代码中通过如下方式加载 `test.png`。
+
+```css
+.test {
+    background: url("/test-plugin/assets/test.png");
+}
+```
+
 ## brake change
 
-`renderer.asCqCode` 更名为 `renderer.asSegment`，调用方式不变;
-
-`redis` 下的 `addSetMember`, `delSetMember` 方法输入类型由 `...value: any[]` 限制为 `...value: string[]`，`existSetMember` 方法由 `value: any` 限制为 `string`。
-
-路径别名变更，`@` 与 `#` 后追加 `/`，防止语义不明。即 `@modules` 变为 `@/modules`，`#genshin` 变为 `#/genshin`。
-
-升级 `redis` 版本，至少为 `v4+`，windows 下载地址：https://github.com/tporadowski/redis/releases
+- `renderer.asCqCode` 更名为 `renderer.asSegment`，调用方式不变;
+- `redis` 下的 `addSetMember`, `delSetMember` 方法输入类型由 `...value: any[]` 限制为 `...value: string[]`，`existSetMember` 方法由 `value: any` 限制为 `string`。
+- 路径别名变更，`@` 与 `#` 后追加 `/`，防止语义不明。即 `@modules` 变为 `@/modules`，`#genshin` 变为 `#/genshin`。
+- 升级 `redis` 版本，至少为 `v4+`，windows 下载地址：https://github.com/tporadowski/redis/releases
+- 由于使用了 `vue-router`，前端本地静态资源引入路径发生变化，相对路径不再准确，建议使用绝对路径，参考上文 **静态资源服务器**

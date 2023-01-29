@@ -101,7 +101,6 @@ export function cardDataParser( data ) {
 	} );
 	
 	return {
-		data,
 		statsList,
 		explorationsList,
 		homesLevel,

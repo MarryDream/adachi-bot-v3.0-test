@@ -369,6 +369,7 @@ export default class Adachi {
 					.replace( / +/g, " " )
 			);
 		}
+		
 		cmd.run( {
 			sendMessage, ...this.bot,
 			messageData, matchResult: res

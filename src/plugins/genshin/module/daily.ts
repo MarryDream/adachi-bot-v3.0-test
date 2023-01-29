@@ -70,7 +70,7 @@ export class DailySet {
 }
 
 async function getRenderResult( id: number, subState: boolean, week?: number ): Promise<RenderResult> {
-	return await renderer.asSegment( "/daily.html", {
+	return await renderer.asSegment( "/daily", {
 		id,
 		type: subState ? "sub" : "all",
 		week: week ?? "today"

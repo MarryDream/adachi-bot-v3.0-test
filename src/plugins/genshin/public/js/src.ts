@@ -1,18 +1,31 @@
-export function parseURL( url ): Record<string, string> {
-	let urlParams = url.substring( 1 ).split( "&" );
-	let result = {};
-	for ( let p of urlParams ) {
-		const [ key, value ] = p.split( "=" );
-		result[key] = value;
+import axios, { AxiosRequestConfig } from "axios";
+
+export function parseURL( url: string ): Record<string, string> {
+	try {
+		const searchParams = [ ...new URL( url ).searchParams ].map( ( [ key, value ] ) => {
+			return [ key, decodeURIComponent( value ) ];
+		} )
+		return Object.fromEntries( searchParams );
+	} catch {
+		return {};
 	}
-	return result;
 }
 
-export function request( url: string ) {
-	const Http = new XMLHttpRequest();
-	Http.open( "GET", `/genshin${ url }`, false );
-	Http.send();
-	return JSON.parse( Http.responseText );
+export async function request( url: string, params: Record<string, any> = {}, method: "get" | "post" | "put" | "delete" = "get" ) {
+	const reqObj: AxiosRequestConfig = {
+		url: url,
+		baseURL: "/genshin",
+		method,
+		responseType: "json",
+		timeout: 60000
+	}
+	if ( method === "get" || method === "delete" ) {
+		reqObj.params = params;
+	} else {
+		reqObj.data = params;
+	}
+	const res = await axios( reqObj );
+	return res.data;
 }
 
 export function getFullDate() {

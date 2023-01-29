@@ -41,8 +41,8 @@ import { defineComponent, onMounted, Ref, ref } from "vue";
 export default defineComponent( {
 	name: "Help",
 	setup() {
-		const urlParams = parseURL( location.search );
-		const data: Ref<{} | null> = ref( null );
+		const urlParams = parseURL( location.href );
+		const data: Ref<Record<string, any> | null> = ref( null );
 
 		const model = urlParams.model;
 
