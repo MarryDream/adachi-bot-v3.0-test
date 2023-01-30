@@ -6,29 +6,41 @@
 
 ```ts
 interface PluginSetting {
-	pluginName: string;
-	cfgList: cmd.ConfigType[];
-	aliases?: string[];
-	// 加个开关，dir 默认 views
-	render?: {
-		dirname?: string
-	};
-	server?: {
-		routers?: Record<string, Router>
-	};
-	repo?: string | {
-		owner: string;// 仓库拥有者名称
-		repoName: string;// 仓库名称
-		ref?: string;// 分支名称
-	}; // 设置为非必须兼容低版本插件
+    pluginName: string;
+    cfgList: cmd.ConfigType[];
+    aliases?: string[];
+    render?: boolean | {
+        dirname?: string;
+        mainFiles?: string[];
+    };
+    server?: {
+    	routers?: Record<string, Router>
+    };
+    repo?: string | {
+    	owner: string;// 仓库拥有者名称
+    	repoName: string;// 仓库名称
+    	ref?: string;// 分支名称
+    }; // 设置为非必须兼容低版本插件
 }
 ```
 
+**render**
+
+是否启用框架的 vue-router 前端路由服务，默认不启用。传入 `true` 或配置对象后开启。
+
+| 属性名       | 说明                                                   | 类型       | 默认值          |
+|-----------|------------------------------------------------------|----------|--------------|
+| dirname   | 从插件目录下的第一级子文件中，指定插件渲染页面存放目录                          | string   | views        |
+| mainFiles | 从指定 dirname 下的第一级子目录内，自动查找的 .vue 文件名称列表，将以左往右的顺序依次尝试 | string[] | \[ "index" ] |
+
 ### 公共 vue-router
 
-前端渲染页已整合至一个公共 vite 项目，共享 vue-router 配置。通过 `PluginSetting.render.dirname` 指定插件渲染页面存放目录，框架将会从该目录下按一定的规则加载 route 配置。
+前端渲染页已整合至一个公共 vite 项目，共享 vue-router 配置。通过 `PluginSetting.render` 配置项进行配置，框架将会从该目录下按一定的规则加载 route 配置。
 
-加载规则：对于 `.vue` 文件，直接按文件名加载路由；对于目录，加载目录内的 `index.vue`，按目录名加载路由。加载的路由路径将以**插件名称**即 `PluginSetting.pluginName` 起始。
+加载规则：
+
+1、对于 `.vue` 文件，直接按文件名加载路由。  
+2、对于目录，按照配置项 `render -> mainFiles` 给出的列表，以从左到右的优先级在目录的第一级文件内查找并加载。例如对于配置项默认值 `[ "index" ]`，将会加载目录内的 `index.vue`。加载的路由路径将以**插件名称**即 `PluginSetting.pluginName` 起始。
 
 **示例**
 

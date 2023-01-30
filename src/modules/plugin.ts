@@ -25,9 +25,9 @@ export interface PluginSetting {
 	pluginName: string;
 	cfgList: cmd.ConfigType[];
 	aliases?: string[];
-	// 加个开关，dir 默认 views
-	render?: {
-		dirname?: string
+	render?: boolean | {
+		dirname?: string;
+		mainFiles?: string[];
 	};
 	server?: {
 		routers?: Record<string, Router>
@@ -67,11 +67,12 @@ export default class Plugin {
 					PluginReSubs[pluginName] = { reSub, subs };
 				}
 				// 加载前端渲染页面路由
-				if ( render?.dirname ) {
-					const renderDir: string = render.dirname;
+				if ( render ) {
+					const renderDir = getObjectValue( render, "dirname", "views" );
+					const mainFiles = getObjectValue( render, "mainFiles", [ "index" ] );
 					const views = bot.file.getDirFiles( `${ plugin }/${ renderDir }`, "plugin" );
 					views.forEach( v => {
-						const route = setRenderRoute( bot, plugin, renderDir, v );
+						const route = setRenderRoute( bot, plugin, renderDir, mainFiles, v );
 						if ( route ) {
 							renderRoutes.push( route );
 						}
@@ -172,7 +173,7 @@ export default class Plugin {
 }
 
 /* 获取插件渲染页的路由对象 */
-function setRenderRoute( bot: BOT, plugin: string, renderDir: string, view: string ): RenderRoutes | null {
+function setRenderRoute( bot: BOT, plugin: string, renderDir: string, mainFiles: string[], view: string ): RenderRoutes | null {
 	let route: RenderRoutes | null = null;
 	const ext: string = extname( view );
 	if ( ext === ".vue" ) {
@@ -190,22 +191,33 @@ function setRenderRoute( bot: BOT, plugin: string, renderDir: string, view: stri
 		// 后缀名不存在且为目录时，加载目录下的 index.vue 文件
 		const fileType = bot.file.getFileType( `${ plugin }/${ renderDir }/${ view }`, "plugin" );
 		if ( fileType === "directory" ) {
-			const path: string = bot.file.getFilePath( `${ plugin }/${ renderDir }/${ view }/index.vue`, "plugin" );
-			// 判断目录下是否存在 index.vue
-			const isExist: boolean = bot.file.isExist( path );
-			if ( isExist ) {
-				route = {
-					path: `/${ plugin }/${ view }`,
-					componentData: {
-						plugin,
-						renderDir,
-						fileDir: view,
-						fileName: "index"
-					}
+			for ( const mainFile of mainFiles ) {
+				const path: string = bot.file.getFilePath( `${ plugin }/${ renderDir }/${ view }/${ mainFile }.vue`, "plugin" );
+				// 判断目录下是否存在 mainFile
+				const isExist: boolean = bot.file.isExist( path );
+				if ( isExist ) {
+					route = {
+						path: `/${ plugin }/${ view }`,
+						componentData: {
+							plugin,
+							renderDir,
+							fileDir: view,
+							fileName: mainFile
+						}
+					};
+					break;
 				}
 			}
 		}
 	}
 	
 	return route;
+}
+
+function getObjectValue<T extends Record<any, any>, K extends keyof T, V>( data: boolean | T, key: K, defaultValue: V ) {
+	if ( typeof data === "boolean" ) {
+		return defaultValue;
+	} else {
+		return data[key] || defaultValue;
+	}
 }

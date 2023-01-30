@@ -376,7 +376,7 @@ export default <PluginSetting>{
 		privateAbyssQuery, privateLedger
 	],
 	render: {
-		dirname: "views"
+		mainFiles: [ "index", "app" ]
 	},
 	server: {
 		routers: serverRouters

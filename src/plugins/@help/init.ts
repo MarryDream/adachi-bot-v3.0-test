@@ -54,9 +54,7 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 	return {
 		pluginName: "@help",
 		cfgList: [ help, detail, call ],
-		render: {
-			dirname: "views"
-		},
+		render: true,
 		server: {
 			routers: serverRouters
 		}
