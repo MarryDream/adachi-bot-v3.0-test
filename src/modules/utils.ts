@@ -56,3 +56,11 @@ export function randomSecret( length: number ): string {
 	
 	return result;
 }
+
+export function getObjectValue<T extends Record<any, any>, K extends keyof T, V>( data: boolean | T, key: K, defaultValue: V ) {
+	if ( typeof data === "boolean" ) {
+		return defaultValue;
+	} else {
+		return data[key] || defaultValue;
+	}
+}

@@ -103,7 +103,7 @@ export default class Adachi {
 		Plugin.load( this.bot ).then( ( { renderRoutes, serverRouters, registerCmd } ) => {
 			this.bot.command.add( registerCmd );
 			/* 开启前端渲染服务 */
-			new RenderServer( renderRoutes, serverRouters );
+			new RenderServer( this.bot.config.renderPort, renderRoutes, serverRouters );
 			/* 事件监听 */
 			this.bot.client.on( "message.group", this.parseGroupMsg( this ) );
 			this.bot.client.on( "message.private", this.parsePrivateMsg( this ) );

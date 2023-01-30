@@ -27,7 +27,7 @@ export interface ScreenshotRendererMethods {
 }
 
 export interface RenderMethods {
-	register( route: string, port: number, defaultSelector: string ): Renderer;
+	register( route: string, defaultSelector: string ): Renderer;
 	/* 浏览器相关 */
 	closeBrowser(): Promise<void>;
 	launchBrowser(): Promise<puppeteer.Browser>;
@@ -43,9 +43,9 @@ export class Renderer implements ScreenshotRendererMethods {
 	
 	constructor(
 		private readonly defaultSelector: string,
-		route: string, port: number
+		route: string
 	) {
-		this.httpBase = `http://localhost:${ port }${ route }`;
+		this.httpBase = `http://localhost:${ bot.config.renderPort }${ route }`;
 	}
 	
 	private getURL( route: string, params?: Record<string, any> ): string {
@@ -123,8 +123,8 @@ export class BasicRenderer implements RenderMethods {
 			.then( browser => this.browser = browser );
 	}
 	
-	public register( route: string, port: number, defaultSelector: string ): Renderer {
-		return new Renderer( defaultSelector, route, port );
+	public register( route: string, defaultSelector: string ): Renderer {
+		return new Renderer( defaultSelector, route );
 	}
 	
 	public async closeBrowser(): Promise<void> {

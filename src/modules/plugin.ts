@@ -1,6 +1,7 @@
 import * as cmd from "./command";
 import { BasicConfig } from "./command";
-import { BOT } from "@/modules/bot";
+import { BOT } from "./bot";
+import { getObjectValue } from "./utils";
 import { extname } from "path";
 import { RenderRoutes, ServerRouters } from "@/types/render";
 import { Router } from "express";
@@ -212,12 +213,4 @@ function setRenderRoute( bot: BOT, plugin: string, renderDir: string, mainFiles:
 	}
 	
 	return route;
-}
-
-function getObjectValue<T extends Record<any, any>, K extends keyof T, V>( data: boolean | T, key: K, defaultValue: V ) {
-	if ( typeof data === "boolean" ) {
-		return defaultValue;
-	} else {
-		return data[key] || defaultValue;
-	}
 }

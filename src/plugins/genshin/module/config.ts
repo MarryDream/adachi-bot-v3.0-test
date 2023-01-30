@@ -3,14 +3,12 @@ import { RefreshCatch } from "@/modules/management/refresh";
 export default class GenshinConfig {
 	public cardWeaponStyle: "normal" | "weaponA" | "weaponB";
 	public cardProfile: "user" | "random";
-	public serverPort: number;
 	public showCharScore: boolean | number[];
 	public wishLimitNum: number;
 	
 	public static init = {
 		cardWeaponStyle: "normal",
 		cardProfile: "random",
-		serverPort: 58612,
 		showCharScore: true,
 		wishLimitNum: 99
 	};
@@ -18,7 +16,6 @@ export default class GenshinConfig {
 	constructor( config: any ) {
 		this.cardWeaponStyle = config.cardWeaponStyle;
 		this.cardProfile = config.cardProfile;
-		this.serverPort = config.serverPort;
 		this.showCharScore = config.showCharScore;
 		this.wishLimitNum = config.wishLimitNum;
 	}

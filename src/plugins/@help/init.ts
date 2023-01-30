@@ -48,7 +48,7 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 	/* 未启用卡片帮助时不启动服务 */
 	if ( bot.config.helpMessageStyle === "card" ) {
 		/* 实例化渲染器 */
-		renderer = bot.renderer.register("/@help", 5173, "#app" );
+		renderer = bot.renderer.register("/@help", "#app" );
 	}
 	
 	return {

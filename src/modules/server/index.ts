@@ -9,17 +9,17 @@ export default class RenderServer {
 	private renderRoutes: Array<RenderRoutes>;
 	private readonly serverRouters: Array<ServerRouters>;
 	
-	constructor( renderRoutes: Array<RenderRoutes>, serverRouters: Array<ServerRouters> ) {
+	constructor( port: number, renderRoutes: Array<RenderRoutes>, serverRouters: Array<ServerRouters> ) {
 		this.renderRoutes = renderRoutes;
 		this.serverRouters = serverRouters;
-		this.createServer().catch();
+		this.createServer(port).catch();
 	}
 	
 	public addRoutes( routes: Array<RenderRoutes> ) {
 		this.renderRoutes = this.renderRoutes.concat( routes );
 	}
 	
-	public async createServer() {
+	public async createServer(port: number) {
 		const app = express();
 		
 		globalThis.__ADACHI_ROUTES__ = this.renderRoutes;
@@ -85,6 +85,6 @@ export default class RenderServer {
 				res.status( 500 ).end( err.stack );
 			}
 		} );
-		app.listen( 5173 );
+		app.listen( port );
 	}
 }

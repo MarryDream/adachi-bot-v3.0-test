@@ -135,10 +135,48 @@ export async function init( bot: BOT ): Promise<PluginSetting> {
 }
 ```
 
+## 注册插件配置文件
+
+新增 `bot.config.register` 方法，该方法会自动创建配置文件，或与已存在的配置文件对比更新新增的配置项。返回处理后的配置项数据。
+
+### 示例
+
+```ts
+/* test-plugin 插件 */
+export async function init( { file, config }: BOT ): Promise<PluginSetting> {
+    // 创建 test-plugin.yml 配置文件 或是与已存在的 test-plugin.yml 进行对比，返回更新后的配置项内容
+	const configData = config.register( file, "test-plugin", { setting1: true, setting2: false } );
+    console.log( configData ); // { setting1: true, setting2: false }
+}
+```
+
 ## brake change
 
-- `renderer.asCqCode` 更名为 `renderer.asSegment`，调用方式不变;
-- `redis` 下的 `addSetMember`, `delSetMember` 方法输入类型由 `...value: any[]` 限制为 `...value: string[]`，`existSetMember` 方法由 `value: any` 限制为 `string`。
-- 路径别名变更，`@` 与 `#` 后追加 `/`，防止语义不明。即 `@modules` 变为 `@/modules`，`#genshin` 变为 `#/genshin`。
-- 升级 `redis` 版本，至少为 `v4+`，windows 下载地址：https://github.com/tporadowski/redis/releases
-- 由于使用了 `vue-router`，前端本地静态资源引入路径发生变化，相对路径不再准确，建议使用绝对路径，参考上文 **静态资源服务器**
+### renderer.asCqCode 方法名称变更
+
+`renderer.asCqCode` 更名为 `renderer.asSegment`，调用方式不变;
+
+### renderer.register 方法参数变更
+
+不再需要传递 `name` 与 `port`（已改为使用 `bot.config.renderPort`） 参数。
+
+对于 `route` 参数，分为两种情况：
+
+- 当使用框架集成的 vue-router 时，建议传递**插件名称**
+- 当使用框架集成的静态资源服务器时，建议传递以 `plugins` 目录为基准的页面所在的目录路径，如 `/genshin/views`
+
+### redis 类工具方法 ts 类型变更
+
+`redis` 下的 `addSetMember`, `delSetMember` 方法输入类型由 `...value: any[]` 限制为 `...value: string[]`，`existSetMember` 方法由 `value: any` 限制为 `string`。
+
+### 路径别名变更
+
+`@` 与 `#` 后追加 `/`，防止语义不明。即 `@modules` 变为 `@/modules`，`#genshin` 变为 `#/genshin`。
+
+### redis 所需版本升级
+
+升级 `redis` 版本，至少为 `v4+`，windows 下载地址：https://github.com/tporadowski/redis/releases
+
+### 前端页面本地静态资源引入路径变更
+
+由于使用了 `vue-router`，相对路径不再准确，建议使用绝对路径，参考上文 **静态资源服务器**

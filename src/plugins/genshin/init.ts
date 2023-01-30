@@ -3,7 +3,6 @@ import { Renderer } from "@/modules/renderer";
 import { BOT } from "@/modules/bot";
 import { PluginSetting, PluginSubSetting, SubInfo } from "@/modules/plugin";
 import GenshinConfig from "./module/config";
-import FileManagement from "@/modules/file";
 import * as m from "./module";
 
 export let config: GenshinConfig;
@@ -18,32 +17,6 @@ export const dailyClass = new m.DailyClass();
 export const slipClass = new m.SlipClass();
 export const privateClass = new m.PrivateClass();
 export const characterID = new m.CharacterId();
-
-function loadConfig( file: FileManagement ): GenshinConfig {
-	const initCfg = GenshinConfig.init;
-	
-	const path: string = file.getFilePath( "genshin.yml" );
-	const isExist: boolean = file.isExist( path );
-	if ( !isExist ) {
-		file.createYAML( "genshin", initCfg );
-		return new GenshinConfig( initCfg );
-	}
-	
-	const config: any = file.loadYAML( "genshin" );
-	const keysNum = o => Object.keys( o ).length;
-	
-	/* 检查 defaultConfig 是否更新 */
-	if ( keysNum( config ) !== keysNum( initCfg ) ) {
-		const c: any = {};
-		const keys: string[] = Object.keys( initCfg );
-		for ( let k of keys ) {
-			c[k] = config[k] ? config[k] : initCfg[k];
-		}
-		file.writeYAML( "genshin", c );
-		return new GenshinConfig( c );
-	}
-	return new GenshinConfig( config );
-}
 
 /* 删除好友后清除订阅服务 */
 async function decreaseFriend( userId: number, { redis }: BOT ) {
@@ -73,11 +46,12 @@ export async function subInfo(): Promise<PluginSubSetting> {
 	}
 }
 
-export async function init( { file, renderer: botRenderer, refresh }: BOT ): Promise<PluginSetting> {
+export async function init( { file, renderer: botRenderer, refresh, config: botConfig }: BOT ): Promise<PluginSetting> {
 	/* 加载 genshin.yml 配置 */
-	config = loadConfig( file );
+	const configData = botConfig.register( file, "genshin", GenshinConfig.init );
+	config = new GenshinConfig( configData );
 	/* 实例化渲染器 */
-	renderer = botRenderer.register( "/genshin", 5173, "#app" );
+	renderer = botRenderer.register( "/genshin", "#app" );
 	
 	refresh.registerRefreshableFile( "genshin", config );
 	refresh.registerRefreshableFile( "cookies", cookies );
