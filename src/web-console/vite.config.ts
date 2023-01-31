@@ -11,10 +11,10 @@ export default ( env: any ) => {
 		plugins: [ vue() ],
 		resolve: {
 			alias: {
-				"ROOT": path.resolve( __dirname, "../../../app.ts" ),
-				"@": path.resolve( __dirname, "../../../src" ),
-				"#": path.resolve( __dirname, "../../../src/plugins" ),
-				"&": path.resolve( __dirname, "../../../src/web-console/frontend" )
+				"ROOT": path.resolve( __dirname, "../../app.ts" ),
+				"@": path.resolve( __dirname, "../../src" ),
+				"#": path.resolve( __dirname, "../../src/plugins" ),
+				"&": path.resolve( __dirname, "../../src/web-console/frontend" )
 			}
 		}
 	} )

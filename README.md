@@ -158,7 +158,7 @@ export async function init( { file, config }: BOT ): Promise<PluginSetting> {
 
 ### renderer.register 方法参数变更
 
-不再需要传递 `name` 与 `port`（已改为使用 `bot.config.renderPort`） 参数。
+不再需要传递 `name` 与 `port`（内部自动使用 `bot.config.renderPort`） 参数。
 
 对于 `route` 参数，分为两种情况：
 

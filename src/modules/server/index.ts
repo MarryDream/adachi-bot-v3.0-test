@@ -1,27 +1,28 @@
 import fs from "fs";
 import { resolve } from "path";
-import express from "express";
+import express, { Express } from "express";
+import { Logger } from "oicq";
 import { createServer as createViteServer } from "vite";
 import { RenderRoutes, ServerRouters } from "@/types/render";
 
 export default class RenderServer {
-	
-	private renderRoutes: Array<RenderRoutes>;
+	private readonly app: Express;
 	private readonly serverRouters: Array<ServerRouters>;
+	private renderRoutes: Array<RenderRoutes>;
+	private isFirstListen: boolean = true;
 	
-	constructor( port: number, renderRoutes: Array<RenderRoutes>, serverRouters: Array<ServerRouters> ) {
+	constructor( port: number, logger: Logger, renderRoutes: Array<RenderRoutes>, serverRouters: Array<ServerRouters> ) {
 		this.renderRoutes = renderRoutes;
 		this.serverRouters = serverRouters;
-		this.createServer(port).catch();
+		this.app = express();
+		this.createServer( port, logger ).catch();
 	}
 	
 	public addRoutes( routes: Array<RenderRoutes> ) {
 		this.renderRoutes = this.renderRoutes.concat( routes );
 	}
 	
-	public async createServer(port: number) {
-		const app = express();
-		
+	public async createServer( port: number, logger: Logger ) {
 		globalThis.__ADACHI_ROUTES__ = this.renderRoutes;
 		// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
 		// 并让上级服务器接管控制
@@ -35,17 +36,17 @@ export default class RenderServer {
 		
 		// 使用 vite 的 Connect 实例作为中间件
 		// 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
-		app.use( vite.middlewares );
+		this.app.use( vite.middlewares );
 		
 		// 为插件目录挂载静态资源服务
-		app.use( express.static( resolve( __dirname, "../../plugins" ) ) );
+		this.app.use( express.static( resolve( __dirname, "../../plugins" ) ) );
 		
 		// 遍历注册插件 express 路由
 		for ( const r of this.serverRouters ) {
-			app.use( r.path, r.router );
+			this.app.use( r.path, r.router );
 		}
 		
-		app.use( '*', async ( req, res, next ) => {
+		this.app.use( '*', async ( req, res, next ) => {
 			// 服务 index.html - 下面我们来处理这个问题
 			const url = req.originalUrl;
 			
@@ -85,6 +86,11 @@ export default class RenderServer {
 				res.status( 500 ).end( err.stack );
 			}
 		} );
-		app.listen( port );
+		if ( this.isFirstListen ) {
+			this.isFirstListen = false;
+			this.app.listen( port, () => {
+				logger.info( `公共 Express 服务已启动, 端口为: ${ port }` );
+			}  );
+		}
 	}
 }
